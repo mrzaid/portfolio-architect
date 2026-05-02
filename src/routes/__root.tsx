@@ -29,14 +29,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Zaid Ahmed Portfolio" },
+      { name: "description", content: "A React personal portfolio website builder with a fixed sidebar, dynamic sections, and responsive design." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Zaid Ahmed Portfolio" },
+      { property: "og:description", content: "A React personal portfolio website builder with a fixed sidebar, dynamic sections, and responsive design." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Zaid Ahmed Portfolio" },
+      { name: "twitter:description", content: "A React personal portfolio website builder with a fixed sidebar, dynamic sections, and responsive design." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/fa9b45f7-2b2b-4865-a7c7-c25ad5563f8f/id-preview-e7ead988--ef5b0866-67f2-4759-a87f-9e5c94eed4b5.lovable.app-1777658692778.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/fa9b45f7-2b2b-4865-a7c7-c25ad5563f8f/id-preview-e7ead988--ef5b0866-67f2-4759-a87f-9e5c94eed4b5.lovable.app-1777658692778.png" },
     ],
     links: [
       {
