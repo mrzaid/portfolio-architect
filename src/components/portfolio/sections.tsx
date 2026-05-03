@@ -1,281 +1,677 @@
-import { MapPin, Github, ExternalLink, Mail, Linkedin } from "lucide-react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import {
+  MapPin,
+  Github,
+  ExternalLink,
+  Mail,
+  Linkedin,
+  ArrowDown,
+  Download,
+  Briefcase,
+  GraduationCap,
+  Brain,
+  Eye,
+  FileText,
+  BarChart3,
+  Globe,
+  Settings,
+  Code,
+  Bot,
+  BookOpen,
+  Award,
+  Sun,
+  Rocket,
+} from "lucide-react";
 import profilePhoto from "@/assets/profile.jpg";
-import { profile, bio, experience, skills, projects, education } from "./data";
+import {
+  profile,
+  experience,
+  skillGroups,
+  projects,
+  education,
+  certifications,
+  summerSchools,
+} from "./data";
 import { SectionTitle } from "./SectionTitle";
 import { Reveal } from "./Reveal";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
+
+// ─── Hero ────────────────────────────────────────────────────────────────────
 
 export function Hero() {
+  const [displayText, setDisplayText] = useState("");
+  const [isTyping, setIsTyping] = useState(true);
+  const fullText = profile.fullName + ".";
+  const vantaRef = useRef<HTMLDivElement | null>(null);
+
+  // Typing animation
+  useEffect(() => {
+    if (isTyping && displayText.length < fullText.length) {
+      const t = setTimeout(() => {
+        setDisplayText(fullText.slice(0, displayText.length + 1));
+      }, 100);
+      return () => clearTimeout(t);
+    } else if (displayText.length === fullText.length) {
+      setIsTyping(false);
+    }
+  }, [displayText, isTyping, fullText]);
+
+  // Vanta NET background
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (typeof window === "undefined") return;
+      let vantaEffect: unknown = null;
+      let cancelled = false;
+      const el = vantaRef.current;
+      if (!el) return;
+      const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+      if (reduced) return;
+
+      (async () => {
+        try {
+          const THREE = await import("three");
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const vantaModule = await import("vanta/dist/vanta.net.min" as any);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const NET = (vantaModule as any).default ?? vantaModule;
+          if (!NET || cancelled) return;
+          vantaEffect = NET({
+            el,
+            THREE,
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.0,
+            minWidth: 200.0,
+            scale: 1.0,
+            scaleMobile: 1.0,
+            color: 0x4a6fa5,
+            color2: 0x3d5a80,
+            backgroundColor: 0x17182e,
+            points: 10.0,
+            maxDistance: 26.0,
+            spacing: 18.0,
+            showDots: false,
+          });
+        } catch {
+          // fallback background stays
+        }
+      })();
+
+      return () => {
+        cancelled = true;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (vantaEffect) (vantaEffect as any).destroy?.();
+      };
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <section id="intro" className="scroll-mt-20 pt-4 pb-24">
-      <div className="grid gap-10 md:grid-cols-[3fr_2fr] md:items-center">
-        <div>
-          <h1 className="animate-fade-up text-4xl md:text-5xl font-bold text-foreground">
-            Hi, I'm {profile.firstName} <span className="inline-block">👋</span>
+    <section
+      id="home"
+      className="relative z-0 min-h-screen flex items-center pt-16 md:pt-0 pb-16 bg-background overflow-x-hidden"
+    >
+      {/* Vanta NET background */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div ref={vantaRef} className="absolute inset-0" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,oklch(0.20_0.02_255),transparent_62%)] opacity-60" />
+      </div>
+
+      <div className="max-w-[900px] mx-auto w-full px-6">
+        <div className="text-center space-y-6">
+          <p className="text-sm text-primary font-medium tracking-wide">Hi, I'm</p>
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]">
+            {displayText}
+            {isTyping && <span className="animate-pulse">|</span>}
           </h1>
-          <p
-            className="mt-2 text-base font-medium text-primary animate-fade-up"
-            style={{ animationDelay: "120ms" }}
-          >
-            👩‍💻 {profile.title} | Researcher | Problem Solver
+          <h2 className="text-2xl md:text-3xl text-muted-foreground font-medium">
+            {profile.title}
+          </h2>
+          <p className="text-base text-muted-foreground max-w-xl leading-relaxed mx-auto">
+            {profile.intro}
           </p>
-          <p
-            className="mt-5 italic text-muted-foreground animate-fade-up"
-            style={{ animationDelay: "200ms" }}
-          >
-            I love to work with text and images!
-          </p>
-          <div
-            className="mt-5 space-y-4 text-[15px] leading-[1.8] text-foreground/90 animate-fade-up"
-            style={{ animationDelay: "280ms" }}
-          >
-            {bio.map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
+
+          <div className="flex flex-wrap gap-3 justify-center">
+            <a
+              href="#projects"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-90 transition"
+            >
+              View Projects
+            </a>
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 rounded-md border border-border px-5 py-3 text-sm font-medium hover:bg-secondary transition"
+            >
+              Contact Me
+            </a>
+            <a
+              href="/cv.pdf"
+              download
+              className="inline-flex items-center gap-2 rounded-md border border-border px-5 py-3 text-sm font-medium hover:bg-secondary transition"
+            >
+              <Download className="h-4 w-4" /> Download CV
+            </a>
           </div>
-          <p
-            className="mt-6 italic text-sm text-muted-foreground animate-fade-up"
-            style={{ animationDelay: "360ms" }}
-          >
-            Find more details in the other sections!
-          </p>
-          <a
-            href={profile.ctaLink}
-            className="mt-6 inline-flex animate-fade-up rounded-full bg-primary px-7 py-3 text-[15px] font-semibold text-primary-foreground transition-all hover:brightness-110 hover:scale-[1.02]"
-            style={{ animationDelay: "440ms" }}
-          >
-            Try My Profile ChatBot
-          </a>
-        </div>
-        <div className="flex justify-center">
-          <img
-            src={profilePhoto}
-            alt={profile.fullName}
-            width={260}
-            height={260}
-            className="h-60 w-60 md:h-64 md:w-64 rounded-full object-cover border-[3px] border-primary glow-ring"
-          />
+
+          <div className="flex items-center gap-5 text-muted-foreground justify-center">
+            <a href={profile.github} target="_blank" rel="noreferrer" aria-label="GitHub" className="hover:text-foreground transition-colors">
+              <Github className="h-5 w-5" />
+            </a>
+            <a href={profile.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn" className="hover:text-foreground transition-colors">
+              <Linkedin className="h-5 w-5" />
+            </a>
+            <a href={`mailto:${profile.email}`} aria-label="Email" className="hover:text-foreground transition-colors">
+              <Mail className="h-5 w-5" />
+            </a>
+          </div>
         </div>
       </div>
+
+      <button
+        onClick={() => document.getElementById("about")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        aria-label="Scroll to about"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-muted-foreground animate-bounce hover:text-foreground transition-colors cursor-pointer bg-transparent border-none"
+      >
+        <ArrowDown className="h-5 w-5" />
+      </button>
     </section>
   );
 }
+
+// ─── Experience ───────────────────────────────────────────────────────────────
 
 export function Experience() {
+  const [filter, setFilter] = useState<"professional" | "teaching">("professional");
+  const filtered = experience.filter((e) => e.category === filter);
+
   return (
-    <section id="experience" className="scroll-mt-20 py-16">
-      <Reveal>
-        <SectionTitle number="01" title="Work Experience" />
-      </Reveal>
-      <div className="space-y-5">
-        {experience.map((job, i) => (
-          <Reveal key={job.company} delay={i * 80}>
-            <article className="card-hover rounded-xl border border-border bg-card p-7 border-l-4 border-l-primary">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <h3 className="text-lg font-bold text-foreground">{job.company}</h3>
-                <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-                  {job.dates}
-                </span>
-              </div>
-              <p className="mt-1 text-[15px] font-semibold text-primary">{job.title}</p>
-              <p className="mt-1 mb-4 flex items-center gap-1.5 text-[13px] text-muted-foreground">
-                <MapPin size={14} /> {job.location}
-              </p>
-              <ul className="space-y-2">
-                {job.bullets.map((b) => (
-                  <li key={b} className="flex gap-2 text-sm leading-[1.8] text-foreground/85">
-                    <span className="mt-1 text-primary">▸</span>
-                    <span>{b}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {job.tags.map((t) => (
-                  <span
-                    key={t}
-                    className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-mono text-primary"
-                  >
-                    {t}
+    <section id="experience" className="relative scroll-mt-20 py-16 px-6">
+      <div className="max-w-[900px] mx-auto">
+        <Reveal>
+          <SectionTitle
+            eyebrow="02 — Experience"
+            title="Where I've worked"
+            description="Roles spanning research, industry, and teaching."
+          />
+        </Reveal>
+
+        {/* Toggle */}
+        <Reveal delay={80}>
+          <div className="mt-2 mb-10 flex flex-wrap gap-2 justify-center">
+            <button
+              onClick={() => setFilter("professional")}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                filter === "professional"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background border border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Briefcase className="h-4 w-4" /> Professional
+            </button>
+            <button
+              onClick={() => setFilter("teaching")}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                filter === "teaching"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background border border-border text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <GraduationCap className="h-4 w-4" /> Teaching
+            </button>
+          </div>
+        </Reveal>
+
+        {/* Timeline */}
+        <ol className="relative border-l border-border ml-3 space-y-10">
+          {filtered.map((e, index) => (
+            <Reveal key={`${filter}-${index}-${e.role}`} delay={index * 80}>
+              <li className="pl-6 relative">
+                <span className="absolute -left-[7px] top-2 h-3 w-3 rounded-full bg-primary ring-4 ring-background" />
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h3 className="text-lg font-semibold">
+                    {e.role}{" "}
+                    <span className="text-primary font-medium">
+                      @{" "}
+                      {e.companyLink ? (
+                        <a href={e.companyLink} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                          {e.company}
+                        </a>
+                      ) : (
+                        e.company
+                      )}
+                    </span>
+                  </h3>
+                  <span className="text-xs text-muted-foreground">
+                    {e.duration}{e.location ? ` · ${e.location}` : ""}
                   </span>
-                ))}
-              </div>
-            </article>
-          </Reveal>
-        ))}
+                </div>
+                <ul className="mt-3 space-y-2 text-sm text-muted-foreground leading-relaxed list-disc pl-5">
+                  {e.bullets.map((b, i) => (
+                    <li key={i}>{b}</li>
+                  ))}
+                </ul>
+                {e.tags && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {e.tags.map((t) => (
+                      <span key={t} className="text-[11px] px-2 py-0.5 rounded-full bg-background border border-border text-muted-foreground">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </li>
+            </Reveal>
+          ))}
+        </ol>
+
+        {filtered.length === 0 && (
+          <p className="text-center py-12 text-sm text-muted-foreground">
+            No {filter} experience to display.
+          </p>
+        )}
       </div>
+
+      <button
+        onClick={() => document.getElementById("projects")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        aria-label="Scroll to projects"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-muted-foreground animate-bounce hover:text-foreground transition-colors cursor-pointer bg-transparent border-none"
+      >
+        <ArrowDown className="h-5 w-5" />
+      </button>
     </section>
   );
 }
 
-export function Skills() {
-  return (
-    <section id="skills" className="scroll-mt-20 py-16">
-      <Reveal>
-        <SectionTitle number="02" title="Skills" />
-      </Reveal>
-      <div className="grid gap-5 md:grid-cols-2">
-        {skills.map((cat, i) => (
-          <Reveal key={cat.title} delay={i * 60}>
-            <div className="card-hover h-full rounded-xl border border-border bg-card p-6">
-              <h3 className="border-b border-border pb-2.5 text-sm font-bold uppercase tracking-wider text-primary">
-                {cat.title}
-              </h3>
-              <div className="mt-3.5 flex flex-wrap gap-2">
-                {cat.items.map((s) => (
-                  <span
-                    key={s}
-                    className="cursor-default rounded-lg border border-border bg-secondary/60 px-3 py-1.5 text-[13px] font-mono text-foreground/90 transition-all hover:border-primary hover:bg-primary/10 hover:text-primary hover:scale-[1.03]"
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-        ))}
-      </div>
-    </section>
-  );
-}
+// ─── Projects ─────────────────────────────────────────────────────────────────
 
 export function Projects() {
+  const [selectedDomain, setSelectedDomain] = useState("all");
+  const [showAll, setShowAll] = useState(false);
+  const { ref: projectsRef, isVisible: projectsVisible } = useScrollReveal<HTMLDivElement>();
+
+  const domains = useMemo(() => [
+    { id: "all", label: "All Projects", count: projects.length },
+    { id: "computer-vision", label: "Computer Vision", count: projects.filter((p) => p.domain === "computer-vision").length },
+    { id: "nlp", label: "NLP", count: projects.filter((p) => p.domain === "nlp").length },
+  ], []);
+
+  const filtered = useMemo(() => {
+    if (selectedDomain === "all") return showAll ? projects : projects.slice(0, 6);
+    return projects.filter((p) => p.domain === selectedDomain);
+  }, [selectedDomain, showAll]);
+
   return (
-    <section id="projects" className="scroll-mt-20 py-16">
-      <Reveal>
-        <SectionTitle number="03" title="Projects" />
-      </Reveal>
-      <div className="grid gap-5 md:grid-cols-2">
-        {projects.map((p, i) => (
-          <Reveal key={p.title} delay={i * 60}>
-            <article className="card-hover flex h-full flex-col rounded-xl border border-border bg-card p-6">
-              <h3 className="text-[17px] font-bold text-foreground">{p.title}</h3>
-              <p className="mt-2.5 text-sm leading-[1.7] text-muted-foreground">{p.description}</p>
-              <div className="mt-auto flex gap-2.5 pt-4">
-                <a
-                  href={p.github}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3.5 py-1.5 text-[13px] text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-                >
-                  <Github size={14} /> GitHub
-                </a>
+    <section id="projects" className="relative scroll-mt-20 py-16 px-6 bg-secondary/20">
+      <div className="max-w-[900px] mx-auto">
+        <Reveal>
+          <SectionTitle
+            eyebrow="03 — Projects"
+            title="Selected work"
+            description="A mix of research, production, and side projects."
+          />
+        </Reveal>
+
+        {/* Domain filter */}
+        <Reveal delay={80}>
+          <div className="mb-8 flex flex-wrap gap-2 justify-center">
+            {domains.map((d) => (
+              <button
+                key={d.id}
+                onClick={() => { setSelectedDomain(d.id); if (d.id !== "all") setShowAll(false); }}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  selectedDomain === d.id
+                    ? "bg-primary text-primary-foreground ring-2 ring-primary/20"
+                    : "bg-muted text-muted-foreground hover:bg-secondary hover:ring-1 hover:ring-border"
+                }`}
+              >
+                {d.label} ({d.count})
+              </button>
+            ))}
+          </div>
+        </Reveal>
+
+        <div
+          ref={projectsRef}
+          className={`grid md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-700 ${
+            projectsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+        >
+          {filtered.map((p, index) => (
+            <article
+              key={p.title}
+              className={`group rounded-xl border border-border bg-card p-6 flex flex-col transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 ${
+                projectsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
+              style={{ transitionDelay: `${index * 100}ms` }}
+            >
+              <div className="flex justify-end mb-4 gap-2">
+                {p.github && (
+                  <a
+                    href={p.github}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="GitHub"
+                    className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
+                  >
+                    <Github className="h-4 w-4" />
+                  </a>
+                )}
                 {p.demo && (
                   <a
                     href={p.demo}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-[13px] font-semibold text-primary-foreground transition-all hover:brightness-110"
+                    aria-label="Live demo"
+                    className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
                   >
-                    <ExternalLink size={14} /> Live Demo
+                    <ExternalLink className="h-4 w-4" />
                   </a>
                 )}
               </div>
+              <h3 className="text-lg font-semibold group-hover:text-primary transition-colors mb-3">
+                {p.title}
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-3 flex-1">
+                {p.description}
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {p.tech.map((t) => (
+                  <span key={t} className="text-xs px-2.5 py-1 rounded-full border border-border text-foreground bg-background/50">
+                    {t}
+                  </span>
+                ))}
+              </div>
             </article>
-          </Reveal>
-        ))}
+          ))}
+        </div>
+
+        {selectedDomain === "all" && projects.length > 6 && (
+          <div className="mt-8 text-center">
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition-colors"
+            >
+              {showAll ? "Show Less" : `Show More (${projects.length - 6} more)`}
+            </button>
+          </div>
+        )}
       </div>
+
+      <button
+        onClick={() => document.getElementById("skills")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        aria-label="Scroll to skills"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-muted-foreground animate-bounce hover:text-foreground transition-colors cursor-pointer bg-transparent border-none"
+      >
+        <ArrowDown className="h-5 w-5" />
+      </button>
     </section>
   );
 }
+
+// ─── Skills ───────────────────────────────────────────────────────────────────
+
+const SKILL_ICONS: Record<string, React.ElementType> = {
+  "AI / ML": Brain,
+  "Computer Vision": Eye,
+  "NLP & OCR": FileText,
+  "LLM Tooling": Bot,
+  "Data & Analytics": BarChart3,
+  "Backend & Web": Globe,
+  "DevOps & Infra": Settings,
+  "Languages": Code,
+};
+
+export function Skills() {
+  return (
+    <section id="skills" className="relative scroll-mt-20 py-16 px-6">
+      <div className="max-w-[900px] mx-auto">
+        <Reveal>
+          <SectionTitle
+            eyebrow="04 — Skills"
+            title="Tools I work with"
+            description="The everyday stack across AI, data, and backend."
+          />
+        </Reveal>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {skillGroups.map((group, i) => {
+            const Icon = SKILL_ICONS[group.title] ?? Code;
+            return (
+              <Reveal key={group.title} delay={i * 60}>
+                <div className="card-hover rounded-xl border border-border bg-card overflow-hidden h-full">
+                  <div className="h-28 bg-secondary/50 flex items-center justify-center">
+                    <div className="text-center">
+                      <Icon className="h-7 w-7 text-primary mb-2 mx-auto" />
+                      <h3 className="text-base font-semibold text-foreground">{group.title}</h3>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <div className="flex flex-wrap gap-1.5">
+                      {group.items.map((s) => (
+                        <span
+                          key={s}
+                          className="text-xs px-2.5 py-1 rounded-full border border-border text-foreground cursor-default hover:border-primary hover:text-primary transition-colors"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+            );
+          })}
+
+          {/* Always Learning card */}
+          <Reveal delay={skillGroups.length * 60}>
+            <div className="card-hover rounded-xl border border-dashed border-border bg-card/50 overflow-hidden h-full">
+              <div className="h-28 bg-secondary/30 flex items-center justify-center">
+                <div className="text-center text-muted-foreground">
+                  <Rocket className="h-7 w-7 mb-2 mx-auto" />
+                  <h3 className="text-base font-semibold">Always Learning</h3>
+                </div>
+              </div>
+              <div className="p-5">
+                <p className="text-sm text-muted-foreground text-center">
+                  Continuously expanding my skill set with new technologies and frameworks.
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+
+      <button
+        onClick={() => document.getElementById("education")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        aria-label="Scroll to education"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-muted-foreground animate-bounce hover:text-foreground transition-colors cursor-pointer bg-transparent border-none"
+      >
+        <ArrowDown className="h-5 w-5" />
+      </button>
+    </section>
+  );
+}
+
+// ─── Education ────────────────────────────────────────────────────────────────
 
 export function Education() {
   return (
-    <section id="education" className="scroll-mt-20 py-16">
-      <Reveal>
-        <SectionTitle number="04" title="Education" />
-      </Reveal>
-      <div className="space-y-5">
-        {education.map((ed, i) => (
-          <Reveal key={ed.degree} delay={i * 80}>
-            <article
-              className="card-hover rounded-xl border border-border bg-card p-7 border-l-4"
-              style={{ borderLeftColor: "var(--color-purple-accent)" }}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <h3 className="text-lg font-bold text-foreground">{ed.degree}</h3>
-                <span
-                  className="rounded-full px-3 py-1 text-xs"
-                  style={{
-                    background: "color-mix(in oklab, var(--color-purple-accent) 12%, transparent)",
-                    border: "1px solid color-mix(in oklab, var(--color-purple-accent) 35%, transparent)",
-                    color: "var(--color-purple-accent)",
-                  }}
-                >
-                  CGPA: {ed.gpa}
-                </span>
+    <section id="education" className="relative scroll-mt-20 py-16 px-6 bg-secondary/20">
+      <div className="max-w-[900px] mx-auto">
+        <Reveal>
+          <SectionTitle
+            eyebrow="05 — Education"
+            title="Academic Background"
+            description="My educational journey and academic achievements."
+          />
+        </Reveal>
+
+        {/* Degrees */}
+        <div className="reveal mt-8 space-y-8">
+          {education.map((ed) => (
+            <div key={ed.degree} className="relative pl-8 pb-8 border-l border-border last:border-l-0">
+              <span className="absolute -left-[7px] top-2 h-3 w-3 rounded-full bg-primary ring-4 ring-background" />
+              <div className="flex items-start gap-3">
+                <GraduationCap className="h-5 w-5 text-primary mt-1 shrink-0" />
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <h3 className="text-lg font-semibold text-foreground">
+                      {ed.type === "master" ? "MASTER'S DEGREE" : "BACHELOR'S DEGREE"}
+                    </h3>
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full border ${
+                        ed.status === "Currently enrolled"
+                          ? "bg-primary/10 text-primary border-primary/20"
+                          : "bg-muted text-foreground border-border"
+                      }`}
+                    >
+                      {ed.status}
+                    </span>
+                  </div>
+                  <h4 className="text-base font-medium text-foreground mb-1">{ed.degree}</h4>
+                  <p className="text-sm text-muted-foreground font-medium mb-1">{ed.school}</p>
+                  <p className="text-sm text-primary font-medium mb-3">{ed.duration}</p>
+                  {ed.courses.length > 0 && (
+                    <div className="mt-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                        <h5 className="text-sm font-semibold text-foreground">Main Courses:</h5>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {ed.courses.map((c) => (
+                          <span key={c} className="text-xs px-2.5 py-1 rounded-full border border-border text-foreground">
+                            {c}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <p
-                className="mt-1 text-[15px] font-semibold"
-                style={{ color: "var(--color-purple-accent)" }}
+            </div>
+          ))}
+        </div>
+
+        {/* Summer Schools */}
+        <div className="reveal mt-16">
+          <div className="flex items-center gap-2 mb-6">
+            <Sun className="h-5 w-5 text-primary" />
+            <h3 className="text-xl font-semibold text-foreground">Summer Schools & Academic Training</h3>
+          </div>
+          <div className="space-y-6">
+            {summerSchools.map((school, index) => (
+              <div key={index} className="relative pl-8 pb-6 border-l border-border/50 last:border-l-0">
+                <span className="absolute -left-[7px] top-2 h-3 w-3 rounded-full bg-primary ring-4 ring-background" />
+                <div className="flex items-start gap-3">
+                  <Sun className="h-5 w-5 text-primary mt-1 shrink-0" />
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold text-foreground mb-1">{school.title}</h4>
+                    <p className="text-sm text-muted-foreground font-medium mb-1">{school.institution}</p>
+                    <p className="text-sm text-primary font-medium mb-3">{school.duration}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-4">{school.description}</p>
+                    <div className="mt-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                        <h5 className="text-sm font-semibold text-foreground">Key Topics:</h5>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {school.topics.map((t) => (
+                          <span key={t} className="text-xs px-2.5 py-1 rounded-full border border-border text-foreground">
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Certifications */}
+        <div className="reveal mt-16">
+          <div className="flex items-center gap-2 mb-6">
+            <Award className="h-5 w-5 text-primary" />
+            <h3 className="text-xl font-semibold text-foreground">Professional Certifications</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {certifications.map((cert, index) => (
+              <div
+                key={index}
+                className="relative group bg-card border border-border rounded-lg p-5 hover:border-primary/50 transition-all duration-300 hover:shadow-lg"
               >
-                {ed.university}
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {ed.honors.map((h) => (
-                  <span
-                    key={h}
-                    className="rounded-full px-3 py-1 text-xs"
-                    style={{
-                      background: "color-mix(in oklab, var(--color-gold-accent) 12%, transparent)",
-                      border: "1px solid color-mix(in oklab, var(--color-gold-accent) 35%, transparent)",
-                      color: "var(--color-gold-accent)",
-                    }}
-                  >
-                    {h}
-                  </span>
-                ))}
+                <div className="flex items-start gap-3">
+                  <Award className="h-5 w-5 text-primary mt-1 shrink-0" />
+                  <div className="flex-1">
+                    <h4 className="text-sm font-semibold text-foreground leading-tight mb-1">{cert.title}</h4>
+                    <p className="text-xs text-muted-foreground mb-2">{cert.issuer}</p>
+                    <a
+                      href={cert.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
+                    >
+                      <span>View Certificate</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               </div>
-              <p className="mt-5 mb-2.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Main Courses
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {ed.courses.map((c) => (
-                  <span
-                    key={c}
-                    className="rounded-lg border border-border bg-secondary/60 px-3 py-1 text-[13px] text-foreground/90"
-                  >
-                    {c}
-                  </span>
-                ))}
-              </div>
-            </article>
-          </Reveal>
-        ))}
+            ))}
+          </div>
+        </div>
       </div>
+
+      <button
+        onClick={() => document.getElementById("leadership")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        aria-label="Scroll to leadership"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-muted-foreground animate-bounce hover:text-foreground transition-colors cursor-pointer bg-transparent border-none"
+      >
+        <ArrowDown className="h-5 w-5" />
+      </button>
     </section>
   );
 }
 
+// ─── Contact ──────────────────────────────────────────────────────────────────
+
 export function Contact() {
-  const links = [
-    { icon: Mail, label: "Email", href: `mailto:${profile.email}`, external: false },
-    { icon: Linkedin, label: "LinkedIn", href: profile.linkedin, external: true },
-    { icon: Github, label: "Github", href: profile.github, external: true },
-  ];
   return (
-    <section id="contact" className="scroll-mt-20 py-16">
-      <Reveal>
-        <SectionTitle number="05" title="Get In Touch" />
-      </Reveal>
-      <Reveal delay={100}>
-        <div className="mx-auto max-w-xl text-center">
-          <p className="text-base text-muted-foreground">
-            Feel free to reach out if you'd like to collaborate or just say hello 👋
-          </p>
-          <div className="mt-9 flex flex-wrap justify-center gap-4">
-            {links.map(({ icon: Icon, label, href, external }) => (
-              <a
-                key={label}
-                href={href}
-                target={external ? "_blank" : undefined}
-                rel={external ? "noreferrer" : undefined}
-                className="inline-flex items-center gap-2.5 rounded-xl border border-border bg-card px-7 py-3.5 text-[15px] font-semibold text-foreground transition-all hover:-translate-y-0.5 hover:border-primary hover:text-primary"
-              >
-                <Icon size={18} /> {label}
-              </a>
-            ))}
+    <section id="contact" className="scroll-mt-20 min-h-[60vh] flex items-center justify-center py-16 px-6 bg-secondary/20">
+      <div className="max-w-[900px] mx-auto text-center w-full">
+        <div className="reveal">
+          <SectionTitle
+            eyebrow="07 — Contact"
+            title="Let's work together"
+            description="Open to AI/ML engineering, data science, applied research, and LLM/NLP roles. Always happy to chat."
+          />
+        </div>
+        <div className="reveal mt-4 flex flex-col items-center gap-6">
+          <a
+            href={`mailto:${profile.email}`}
+            className="text-2xl md:text-3xl font-semibold text-primary hover:underline underline-offset-4"
+          >
+            {profile.email}
+          </a>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin className="h-4 w-4" /> {profile.location}
+            </span>
+            <a href={profile.github} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors">
+              <Github className="h-4 w-4" /> GitHub
+            </a>
+            <a href={profile.linkedin} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors">
+              <Linkedin className="h-4 w-4" /> LinkedIn
+            </a>
+            <a href={`mailto:${profile.email}`} className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors">
+              <Mail className="h-4 w-4" /> Email
+            </a>
           </div>
         </div>
-      </Reveal>
+      </div>
     </section>
   );
 }

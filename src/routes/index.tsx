@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Sidebar } from "@/components/portfolio/Sidebar";
+import { ScrollProgress } from "@/components/portfolio/ScrollProgress";
+import { About } from "@/components/portfolio/About";
+import { Leadership } from "@/components/portfolio/Leadership";
+import { Footer } from "@/components/portfolio/Footer";
 import {
   Hero,
   Experience,
@@ -10,6 +14,7 @@ import {
   Contact,
 } from "@/components/portfolio/sections";
 import { navLinks, profile, bio } from "@/components/portfolio/data";
+import { useReveal } from "@/hooks/use-reveal";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,7 +30,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const [active, setActive] = useState("intro");
+  const [active, setActive] = useState("home");
+  useReveal();
 
   useEffect(() => {
     const sections = navLinks
@@ -44,18 +50,22 @@ function Index() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground antialiased">
+      <ScrollProgress />
       <Sidebar active={active} />
-      <main className="md:pl-[270px]">
-        <div className="mx-auto max-w-[900px] px-6 pt-[80px] pb-20 md:pt-16">
+      <div className="md:pl-[270px]">
+        <main className="pt-[60px] md:pt-0">
           <Hero />
+          <About />
           <Experience />
-          <Skills />
           <Projects />
+          <Skills />
           <Education />
+          <Leadership />
           <Contact />
-        </div>
-      </main>
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }
