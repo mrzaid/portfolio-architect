@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   MapPin,
   Github,
@@ -39,91 +39,16 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 // ─── Hero ────────────────────────────────────────────────────────────────────
 
 export function Hero() {
-  const [displayText, setDisplayText] = useState("");
-  const [isTyping, setIsTyping] = useState(true);
-  const fullText = profile.fullName + ".";
-  const vantaRef = useRef<HTMLDivElement | null>(null);
-
-  // Typing animation
-  useEffect(() => {
-    if (isTyping && displayText.length < fullText.length) {
-      const t = setTimeout(() => {
-        setDisplayText(fullText.slice(0, displayText.length + 1));
-      }, 100);
-      return () => clearTimeout(t);
-    } else if (displayText.length === fullText.length) {
-      setIsTyping(false);
-    }
-  }, [displayText, isTyping, fullText]);
-
-  // Vanta NET background
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (typeof window === "undefined") return;
-      let vantaEffect: unknown = null;
-      let cancelled = false;
-      const el = vantaRef.current;
-      if (!el) return;
-      const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-      if (reduced) return;
-
-      (async () => {
-        try {
-          const THREE = await import("three");
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const vantaModule = await import("vanta/dist/vanta.net.min" as any);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const NET = (vantaModule as any).default ?? vantaModule;
-          if (!NET || cancelled) return;
-          vantaEffect = NET({
-            el,
-            THREE,
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.0,
-            minWidth: 200.0,
-            scale: 1.0,
-            scaleMobile: 1.0,
-            color: 0x4a6fa5,
-            color2: 0x3d5a80,
-            backgroundColor: 0x17182e,
-            points: 10.0,
-            maxDistance: 26.0,
-            spacing: 18.0,
-            showDots: false,
-          });
-        } catch {
-          // fallback background stays
-        }
-      })();
-
-      return () => {
-        cancelled = true;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (vantaEffect) (vantaEffect as any).destroy?.();
-      };
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <section
       id="home"
       className="relative z-0 min-h-screen flex items-center pt-16 md:pt-0 pb-16 bg-background overflow-x-hidden"
     >
-      {/* Vanta NET background */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div ref={vantaRef} className="absolute inset-0" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,oklch(0.20_0.02_255),transparent_62%)] opacity-60" />
-      </div>
-
       <div className="max-w-[900px] mx-auto w-full px-6">
         <div className="text-center space-y-6">
           <p className="text-sm text-primary font-medium tracking-wide">Hi, I'm</p>
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-[1.05]">
-            {displayText}
-            {isTyping && <span className="animate-pulse">|</span>}
+            {profile.fullName}.
           </h1>
           <h2 className="text-2xl md:text-3xl text-muted-foreground font-medium">
             {profile.title}
