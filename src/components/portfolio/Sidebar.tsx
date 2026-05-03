@@ -134,12 +134,11 @@ function SidebarInner({
 
 export function Sidebar({ active }: { active: string }) {
   const [open, setOpen] = useState(false);
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
-    const prefers = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const isDark = stored ? stored === "dark" : prefers;
+    const isDark = stored ? stored === "dark" : false;
     setDark(isDark);
     document.documentElement.classList.toggle("dark", isDark);
   }, []);
